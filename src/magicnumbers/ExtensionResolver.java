@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ExtensionResolver {
 
@@ -42,22 +44,28 @@ public class ExtensionResolver {
         try {
             FileInputStream testFile = readFile();
             String[] magicNumberOfTestFile = extensionMap.get(this.expectedExtension);
-
-            if (magicNumberOfTestFile == null){
+            
+            if (magicNumberOfTestFile == null) {
                 System.out.println("Unsupported Extension");
                 return false;
             }
-            
-            for(int i=0;i < magicNumberOfTestFile.length;i ++){
+
+            String actualMagicNumberOfFile = "";
+            boolean notMatch = false;
+            for (int i = 0; i < magicNumberOfTestFile.length; i++) {
                 int currentFilebyte = testFile.read();
-                
+
                 String hexValueOfByte = Integer.toHexString(currentFilebyte);
-                
-                if(!hexValueOfByte.equals(magicNumberOfTestFile[i])) {
-                    //System.out.println(hexValueOfByte + " : " + magicNumberOfTestFile[i]);
-                    System.out.println("Extension is " + this.expectedExtension + ", while actually it's a B.");
-                    return false;
+                actualMagicNumberOfFile += hexValueOfByte + " ";
+                if (!hexValueOfByte.equals(magicNumberOfTestFile[i])) {
+                    notMatch = true;
                 }
+            }
+            
+            if (notMatch) {
+                String actualExtension = this.getActualExtension(actualMagicNumberOfFile.trim());
+                System.out.println("Extension is " + this.expectedExtension + ", while actually it's " + actualExtension + ".");
+                return false;
             }
         } catch (Exception e) {
             System.out.println("Error" + e.toString());
@@ -69,5 +77,19 @@ public class ExtensionResolver {
         URL url = getClass().getResource(this.filename);
         File file = new File(url.getPath());
         return new FileInputStream(file);
+    }
+
+    public String getActualExtension(String magicNumber) {
+        Iterator it = this.extensionMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            String tempMagicNumber = String.join(" ", (String[])pair.getValue());
+            if (magicNumber.equals(tempMagicNumber)) {
+                return (String)pair.getKey();
+            }
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+        
+        return "unsupported";
     }
 }

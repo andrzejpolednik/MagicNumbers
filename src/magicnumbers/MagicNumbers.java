@@ -23,6 +23,7 @@ public class MagicNumbers {
             System.out.println("Extension is valid");
         }
         
+       
         
     }
     
