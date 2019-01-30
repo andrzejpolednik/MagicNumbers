@@ -23,6 +23,11 @@ public class MagicNumbers {
             System.out.println("Extension is valid");
         }
 
+                
+        ExtensionResolver erInvalidTiff = new ExtensionResolver("invalid_tiff.tiff");
+        if (erInvalidTiff.isExtensionValid()) {
+            System.out.println("Extension is valid");
+        }
         
     }
     

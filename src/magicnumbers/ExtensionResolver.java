@@ -42,13 +42,14 @@ public class ExtensionResolver {
 
     public boolean isExtensionValid() {
         try {
-            FileInputStream testFile = readFile();
             String[] magicNumberOfTestFile = extensionMap.get(this.expectedExtension);
             
             if (magicNumberOfTestFile == null) {
                 System.out.println("Unsupported Extension");
                 return false;
             }
+            
+            FileInputStream testFile = readFile();
 
             String actualMagicNumberOfFile = "";
             boolean notMatch = false;
