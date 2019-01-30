@@ -11,11 +11,16 @@ public class ExtensionResolver {
     private String expectedExtension;
     private HashMap<String, String[]> extensionMap = createMap();
 
+    // https://en.wikipedia.org/wiki/Magic_number_(programming)
     private static HashMap<String, String[]> createMap() {
         HashMap<String, String[]> extensionMap = new HashMap<String, String[]>();
-        String[] jpg = {"FF", "D8", "FF", "E0", "00", "10", "4A", "46", "49", "46", "00", "01"};
+        // JPEG image files begin with FF D8 and end with FF D9. JPEG/JFIF files contain the ASCII code for "JFIF" (4A 46 49 46) as a null terminated string.
+        String[] jpg = {"ff", "d8"};
+        // The UTF-8 representation of the BOM is the (hexadecimal) byte sequence 0xEF,0xBB,0xBF.
+        String[] txt = {"ef", "bb", "bf"};
 
         extensionMap.put("jpg", jpg);
+        extensionMap.put("txt", txt);
 
         return extensionMap;
     }
@@ -33,19 +38,24 @@ public class ExtensionResolver {
         try {
             FileInputStream testFile = readFile();
             String[] magicNumberOfTestFile = extensionMap.get(this.expectedExtension);
-            if (magicNumberOfTestFile.length == 0){
+            if (magicNumberOfTestFile == null){
                 System.out.println("Unsupported Extension");
                 return false;
             }
             
             for(int i=0;i < magicNumberOfTestFile.length;i ++){
                 int currentFilebyte = testFile.read();
-                System.out.println(currentFilebyte);
-                //String hexValueOfByte = Integer.valueOf(String.valueOf(currentFilebyte), 16);
-                //if()
+                
+                String hexValueOfByte = Integer.toHexString(currentFilebyte);
+                
+                if(!hexValueOfByte.equals(magicNumberOfTestFile[i])) {
+                    System.out.println(hexValueOfByte + " : " + magicNumberOfTestFile[i]);
+                    System.out.println("Extension is " + this.expectedExtension + ", while actually it's a B.");
+                    return false;
+                }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error" + e.toString());
         }
         return true;
     }
